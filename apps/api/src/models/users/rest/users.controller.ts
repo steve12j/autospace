@@ -1,10 +1,16 @@
 import {
-  Controller, Get, Post, Body, Patch, Param, Delete, Query
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
 } from '@nestjs/common'
 
 import { PrismaService } from 'src/common/prisma/prisma.service'
 import { ApiTags } from '@nestjs/swagger'
-import { CreateUser } from './dtos/create.dto'
 import { UserQueryDto } from './dtos/query.dto'
 import { UpdateUser } from './dtos/update.dto'
 import {
@@ -16,7 +22,7 @@ import { UserEntity } from './entity/user.entity'
 import { AllowAuthenticated, GetUser } from 'src/common/auth/auth.decorator'
 import { GetUserType } from 'src/common/types'
 import { checkRowLevelPermission } from 'src/common/auth/util'
-
+import { CreateUser } from './dtos/create.dto'
 
 @ApiTags('users')
 @Controller('users')
@@ -43,24 +49,24 @@ export class UsersController {
   }
 
   @ApiOkResponse({ type: UserEntity })
-  @Get(':id')
-  findOne(@Param('id') id: number) {
-    return this.prisma.user.findUnique({ where: { id } })
+  @Get(':uid')
+  findOne(@Param('uid') uid: string) {
+    return this.prisma.user.findUnique({ where: { uid } })
   }
 
   @ApiOkResponse({ type: UserEntity })
   @ApiBearerAuth()
   @AllowAuthenticated()
-  @Patch(':id')
+  @Patch(':uid')
   async update(
-    @Param('id') id: number,
+    @Param('uid') uid: string,
     @Body() updateUserDto: UpdateUser,
     @GetUser() user: GetUserType,
   ) {
-    const user = await this.prisma.user.findUnique({ where: { id } })
-    checkRowLevelPermission(user, user.uid)
+    const userInfo = await this.prisma.user.findUnique({ where: { uid } })
+    checkRowLevelPermission(user, userInfo?.uid)
     return this.prisma.user.update({
-      where: { id },
+      where: { uid },
       data: updateUserDto,
     })
   }
@@ -68,9 +74,9 @@ export class UsersController {
   @ApiBearerAuth()
   @AllowAuthenticated()
   @Delete(':id')
-  async remove(@Param('id') id: number, @GetUser() user: GetUserType) {
-    const user = await this.prisma.user.findUnique({ where: { id } })
-    checkRowLevelPermission(user, user.uid)
-    return this.prisma.user.delete({ where: { id } })
+  async remove(@Param('id') uid: string, @GetUser() user: GetUserType) {
+    const userInfo = await this.prisma.user.findUnique({ where: { uid } })
+    checkRowLevelPermission(user, userInfo?.uid)
+    return this.prisma.user.delete({ where: { uid } })
   }
 }

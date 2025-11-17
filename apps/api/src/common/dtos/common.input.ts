@@ -6,7 +6,22 @@ import {
   ObjectType,
   registerEnumType,
 } from '@nestjs/graphql'
-import { Prisma } from '@prisma/client'
+import { Prisma } from 'generated/prisma'
+
+// Prisma v6 no longer exports `Prisma.QueryMode` directly
+// So define these enums manually
+export enum QueryMode {
+  default = 'default',
+  insensitive = 'insensitive',
+}
+
+export enum SortOrder {
+  asc = 'asc',
+  desc = 'desc',
+}
+
+registerEnumType(QueryMode, { name: 'QueryMode' })
+registerEnumType(SortOrder, { name: 'SortOrder' })
 
 export type RestrictProperties<T, U> = {
   [K in keyof T]: K extends keyof U ? T[K] : never
@@ -15,7 +30,7 @@ export type RestrictProperties<T, U> = {
 // implements Prisma.DateTimeFilter
 @InputType()
 export class DateTimeFilter {
-  equals?: string
+  equals?: string;
   in?: string[]
   notIn?: string[]
   lt?: string
@@ -24,14 +39,9 @@ export class DateTimeFilter {
   gte?: string
 }
 
-registerEnumType(Prisma.QueryMode, {
-  name: 'QueryMode',
-})
-
-// implements Required<Prisma.StringFilter>
 @InputType()
 export class StringFilter {
-  equals?: string
+  equals?: string;
   in?: string[]
   notIn?: string[]
   lt?: string
@@ -42,9 +52,11 @@ export class StringFilter {
   startsWith?: string
   endsWith?: string
   not?: string
-  @Field(() => Prisma.QueryMode)
+
+  @Field(() => QueryMode, { nullable: true })
   mode?: Prisma.QueryMode
 }
+
 @InputType()
 export class StringListFilter {
   equals?: string[]
@@ -60,7 +72,6 @@ export class BoolFilter {
   not?: boolean
 }
 
-// implements Required<Prisma.IntFilter>
 @InputType()
 export class IntFilter {
   equals?: number
@@ -69,7 +80,6 @@ export class IntFilter {
   gt?: number
   gte?: number
 }
-
 
 @InputType()
 export class FloatFilter {
@@ -80,10 +90,6 @@ export class FloatFilter {
   gte?: number
   not?: number
 }
-
-registerEnumType(Prisma.SortOrder, {
-  name: 'SortOrder',
-})
 
 @ObjectType()
 export class AggregateCountOutput {

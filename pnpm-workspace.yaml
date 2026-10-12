@@ -1,3 +1,10 @@
 packages:
   - 'apps/*'
   - 'libs/*'
+
+ignoredBuiltDependencies:
+  - sharp
+  - unrs-resolver
+
+linkWorkspacePackages: true
+

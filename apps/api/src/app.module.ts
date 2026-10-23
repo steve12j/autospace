@@ -1,9 +1,28 @@
 import { Module } from '@nestjs/common'
 import { AppController } from './app.controller.js'
 import { AppService } from './app.service.js'
+import { GraphQLModule } from '@nestjs/graphql'
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo'
+import { join } from 'path'
+import { ConfigModule } from '@nestjs/config'
+import { UsersModule } from './users/users.module.js'
 
 @Module({
-  imports: [],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      introspection: true,
+      fieldResolverEnhancers: ['guards'],
+      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+      buildSchemaOptions: {
+        numberScalarMode: 'integer',
+      },
+    }),
+    UsersModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

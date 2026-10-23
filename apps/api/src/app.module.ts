@@ -5,7 +5,6 @@ import { GraphQLModule } from '@nestjs/graphql'
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo'
 import { join } from 'path'
 import { ConfigModule } from '@nestjs/config'
-import { UsersModule } from './users/users.module.js'
 
 @Module({
   imports: [
@@ -21,7 +20,6 @@ import { UsersModule } from './users/users.module.js'
         numberScalarMode: 'integer',
       },
     }),
-    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

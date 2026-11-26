@@ -23,6 +23,7 @@ export class AuthGuard implements CanActivate {
 
     await this.authenticateUser(req)
 
+    // Return ForbiddenException if false is returned
     return this.authorizeUser(req, context)
   }
 
@@ -36,10 +37,23 @@ export class AuthGuard implements CanActivate {
     }
 
     try {
-      const user = await this.jwtService.verify(token)
+      const payload = await this.jwtService.verify(token)
+      console.log('JWT payload:', payload)
+      if (!payload.uid) {
+        throw new UnauthorizedException('User not found in token.')
+      }
+
+      const user = await this.prisma.user.findUnique({
+        where: { uid: payload.uid },
+      })
+
+      if (!user) {
+        throw new UnauthorizedException('User not found in database.')
+      }
       req.user = user
     } catch (err) {
       console.error('Token validation error:', err)
+      throw err
     }
 
     if (!req.user) {

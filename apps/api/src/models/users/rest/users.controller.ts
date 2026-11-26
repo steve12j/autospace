@@ -29,12 +29,12 @@ import { checkRowLevelPermission } from '@/common/auth/util.js'
 export class UsersController {
   constructor(private readonly prisma: PrismaService) {}
 
-  // @AllowAuthenticated()
-  // @ApiBearerAuth()
+  @AllowAuthenticated()
+  @ApiBearerAuth()
   @ApiCreatedResponse({ type: UserEntity })
   @Post()
   create(@Body() createUserDto: CreateUser, @GetUser() user: GetUserType) {
-    // checkRowLevelPermission(user, createUserDto.uid)
+    checkRowLevelPermission(user, createUserDto.uid)
     return this.prisma.user.create({ data: createUserDto })
   }
 
@@ -77,11 +77,11 @@ export class UsersController {
   }
 
   @ApiBearerAuth()
-  // @AllowAuthenticated()
+  @AllowAuthenticated()
   @Delete(':uid')
   async remove(@Param('uid') uid: string, @GetUser() user: GetUserType) {
     const userInfo = await this.prisma.user.findUnique({ where: { uid } })
-    // checkRowLevelPermission(user, userInfo?.uid)
+    checkRowLevelPermission(user, userInfo?.uid)
     return this.prisma.user.delete({ where: { uid } })
   }
 }

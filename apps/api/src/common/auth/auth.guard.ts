@@ -84,15 +84,14 @@ export class AuthGuard implements CanActivate {
   }
 
   private async getUserRoles(uid: string): Promise<Role[]> {
-    const rolePromises = [
-      this.prisma.admin.findUnique({ where: { uid } }),
-      // Add promises for other role models here
-    ]
-
     const roles: Role[] = []
 
-    const [admin] = await Promise.all(rolePromises)
-    admin && roles.push('admin')
+    const admin = await this.prisma.admin.findUnique({
+      where: { uid },
+    })
+    if (admin) {
+      roles.push('admin')
+    }
 
     return roles
   }

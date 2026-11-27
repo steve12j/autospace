@@ -5,7 +5,12 @@ import {
   FindManyUserArgs,
   FindUniqueUserArgs,
 } from '@/models/users/graphql/dtos/find.args.js'
-import { CreateUserInput } from '@/models/users/graphql/dtos/create-user.input.js'
+import {
+  LoginInput,
+  LoginOutput,
+  RegisterWithCredentialsInput,
+  RegisterWithProviderInput,
+} from '@/models/users/graphql/dtos/create-user.input.js'
 import { UpdateUserInput } from '@/models/users/graphql/dtos/update-user.input.js'
 import { checkRowLevelPermission } from '@/common/auth/util.js'
 import type { GetUserType } from '@/common/types/index.js'
@@ -19,14 +24,29 @@ export class UsersResolver {
     private readonly prisma: PrismaService,
   ) {}
 
-  @AllowAuthenticated()
   @Mutation(() => User)
-  createUser(
-    @Args('createUserInput') args: CreateUserInput,
-    @GetUser() user: GetUserType,
+  async registerWithCredentials(
+    @Args('registerWithCredentialsInput') args: RegisterWithCredentialsInput,
   ) {
-    checkRowLevelPermission(user, args.uid)
-    return this.usersService.create(args)
+    return this.usersService.registerWithCredentials(args)
+  }
+
+  @Mutation(() => User)
+  async registerWithProvider(
+    @Args('registerWithProviderInput') args: RegisterWithProviderInput,
+  ) {
+    return this.usersService.registerWithProvider(args)
+  }
+
+  @Mutation(() => LoginOutput)
+  async login(@Args('loginInput') args: LoginInput) {
+    return this.usersService.login(args)
+  }
+
+  @AllowAuthenticated()
+  @Query(() => User)
+  whoAmI(@GetUser() user: GetUserType) {
+    return this.usersService.findOne({ where: { uid: user.uid } })
   }
 
   @Query(() => [User], { name: 'users' })
